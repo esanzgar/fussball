@@ -1,1 +1,3 @@
 # fussball
+
+For the sceptics that doubt about the randomness of the script...
