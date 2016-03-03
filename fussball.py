@@ -3,6 +3,7 @@
 To make random teams
 '''
 
+import sys
 import random
 from datetime import date
 import smtplib
@@ -65,7 +66,7 @@ def send_email(sender, recipients, subject, body):
     server.sendmail(sender, recipients, msg.as_string())
     server.quit()
 
-def body_formater(groups, substitute):
+def body_formater(groups, substitute, seed=None):
     '''
     Transform the groups into a nice string.
     '''
@@ -81,9 +82,17 @@ def body_formater(groups, substitute):
 
     body += '\n\nMay the force be with you...\n'
 
+    if seed:
+        body += "\n\nRun with seed %s." % seed
+
     return body
 
 if __name__ == '__main__':
+    try:
+        seed = int(sys.argv[1])
+    except IndexError:
+        print >> sys.stderr, "Warning: seed not set"
+        seed = None
 
     fussballers = [x[0] for x in PLAYERS]
     teams, sub = suffles_and_group(fussballers)
@@ -92,7 +101,7 @@ if __name__ == '__main__':
     sender = user + '@ebi.ac.uk'
     recipients = [x[1] for x in PLAYERS]
     recipients =['eduardo@ebi.ac.uk']
-    msg = body_formater(teams, sub)
+    msg = body_formater(teams, sub, seed)
     subject = 'Cron <%s@%s> Fussball: results of the draw -- %s' \
             % (user, socket.gethostname(), date.today().isoformat())
     send_email(sender, recipients, subject, msg)
