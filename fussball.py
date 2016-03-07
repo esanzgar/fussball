@@ -92,7 +92,7 @@ def body_formater(groups, substitute):
 
 if __name__ == '__main__':
     try:
-        seed = int(sys.argv[1])
+        seed = sys.argv[1]
     except IndexError:
         seed = os.urandom(32).encode('hex')
 
