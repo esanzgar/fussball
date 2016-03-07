@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-'''
+"""
 To make random teams
-'''
-
+"""
+import os
 import sys
 import random
 from datetime import date
@@ -16,22 +16,23 @@ from players import PLAYERS # PLAYERS is a list of tuples (name, email).
 
 PEOPLE_PER_GROUP = 4
 
+
 def grouper(iterable, n_per_group, fillvalue=None):
-    '''
+    """
     Makes groups of n elements per group
-    '''
+    """
 
     args = [iter(iterable)] * n_per_group
     return izip_longest(*args, fillvalue=fillvalue)
 
+
 def suffles_and_group(players, seed=None):
-    '''
+    """
     Shuffles the list of players and makes groups according to PEOPLE_PER_GROUP
     variable. If the number is odd then it uses as substitute.
-    '''
-    if seed:
-        random.seed(seed)
+    """
 
+    random.seed(seed)
     random.shuffle(players)
 
     # Remove one player if odd number of players and use it as substitute
@@ -48,11 +49,12 @@ def suffles_and_group(players, seed=None):
 
     return groups, substitute
 
+
 def send_email(sender, recipients, subject, body):
-    '''
+    """
     Function to send emails.
     sender and recipients can be a list or a string.
-    '''
+    """
 
     msg = MIMEText(body)
     msg['Subject'] = Header(subject) #for python 2.6  http://bugs.python.org/issue1974
@@ -68,10 +70,11 @@ def send_email(sender, recipients, subject, body):
     server.sendmail(sender, recipients, msg.as_string())
     server.quit()
 
-def body_formater(groups, substitute, seed=None):
-    '''
+
+def body_formater(groups, substitute):
+    """
     Transform the groups into a nice string.
-    '''
+    """
 
     body = "Teams and groups for this week's championship:\n\n"
     for index, group in enumerate(groups):
@@ -84,17 +87,14 @@ def body_formater(groups, substitute, seed=None):
 
     body += '\n\nMay the force be with you...\n'
 
-    if seed:
-        body += "\n\nRun with seed %s." % seed
-
     return body
+
 
 if __name__ == '__main__':
     try:
         seed = int(sys.argv[1])
     except IndexError:
-        print >> sys.stderr, "Warning: seed not set"
-        seed = None
+        seed = os.urandom(32).encode('hex')
 
     fussballers = [x[0] for x in PLAYERS]
     teams, sub = suffles_and_group(fussballers, seed=seed)
@@ -102,8 +102,8 @@ if __name__ == '__main__':
     user = getpass.getuser()
     sender = user + '@ebi.ac.uk'
     recipients = [x[1] for x in PLAYERS]
-    recipients =['eduardo@ebi.ac.uk']
-    msg = body_formater(teams, sub, seed=seed)
+    msg = body_formater(teams, sub)
+    msg += "\n\nRun with seed: %s" % seed
     subject = 'Cron <%s@%s> Fussball: results of the draw -- %s' \
             % (user, socket.gethostname(), date.today().isoformat())
     send_email(sender, recipients, subject, msg)
